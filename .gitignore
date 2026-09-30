@@ -35,3 +35,4 @@ HANDOFF.md
 # Site-specific build glue: absolute HPC paths and an external preprocessor.
 # Kept locally because it is the production build, but it is not portable.
 scripts/build_eurocom_2024.sh
+CLAUDE.md

@@ -1,0 +1,582 @@
+<title>Choosing Δ_atm</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  color-scheme: light;
+  --bg:#fbfbfa; --panel:#ffffff; --panel-2:#f4f5f6;
+  --ink:#14161a; --ink-2:#4d5560; --ink-3:#767f8b;
+  --rule:#e0e3e7; --rule-2:#eef0f2;
+  --accent:#2a78d6;
+  --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --s4:#eda100; --s5:#e87ba4; --s6:#008300;
+  --ref:#8b939e;
+  --pos:#c93534; --neg:#2a78d6;
+  --shadow:0 1px 2px rgba(20,22,26,.05), 0 8px 24px rgba(20,22,26,.05);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+    --bg:#131416; --panel:#1a1c1f; --panel-2:#212429;
+    --ink:#f2f4f6; --ink-2:#b6bec9; --ink-3:#868e99;
+    --rule:#2c3036; --rule-2:#23262b;
+    --accent:#3987e5;
+    --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500; --s5:#d55181; --s6:#008300;
+    --ref:#7d858f;
+    --pos:#e34948; --neg:#3987e5;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.3);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --bg:#131416; --panel:#1a1c1f; --panel-2:#212429;
+  --ink:#f2f4f6; --ink-2:#b6bec9; --ink-3:#868e99;
+  --rule:#2c3036; --rule-2:#23262b;
+  --accent:#3987e5;
+  --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500; --s5:#d55181; --s6:#008300;
+  --ref:#7d858f;
+  --pos:#e34948; --neg:#3987e5;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.3);
+}
+
+*{box-sizing:border-box}
+body{
+  background:var(--bg); color:var(--ink);
+  font-family:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  font-size:15.5px; line-height:1.62; margin:0;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1120px; margin:0 auto; padding:0 24px 96px}
+.prose{max-width:68ch}
+h1,h2,h3{font-family:Spectral,Georgia,serif; font-weight:600; text-wrap:balance; margin:0}
+h1{font-size:clamp(2rem,4.4vw,3rem); line-height:1.1; letter-spacing:-.014em}
+h2{font-size:1.6rem; line-height:1.22; letter-spacing:-.008em}
+h3{font-size:1.09rem; line-height:1.3}
+p{margin:0 0 1.05em}
+a{color:var(--accent)}
+code,.mono{font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace; font-size:.9em}
+.num{font-variant-numeric:tabular-nums}
+
+header{border-bottom:1px solid var(--rule); padding:64px 0 40px; margin-bottom:44px}
+.eyebrow{
+  font-family:"IBM Plex Mono",monospace; font-size:.705rem; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--ink-3); margin:0 0 18px
+}
+.lede{font-size:1.16rem; color:var(--ink-2); margin-top:20px; max-width:66ch}
+
+section{margin:0 0 60px; scroll-margin-top:20px}
+section > h2{margin-bottom:6px}
+.sub{color:var(--ink-3); font-size:.93rem; margin:0 0 22px; max-width:70ch}
+
+.stats{display:grid; grid-template-columns:repeat(auto-fit,minmax(212px,1fr)); gap:14px; margin:30px 0 0}
+.stat{background:var(--panel); border:1px solid var(--rule); border-radius:9px; padding:17px 18px; box-shadow:var(--shadow)}
+.stat .k{font-family:"IBM Plex Mono",monospace; font-size:.685rem; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-3); margin-bottom:9px}
+.stat .v{font-family:Spectral,serif; font-size:2.05rem; line-height:1; font-variant-numeric:tabular-nums; letter-spacing:-.02em}
+.stat .n{font-size:.845rem; color:var(--ink-2); margin-top:9px; line-height:1.42}
+
+.card{background:var(--panel); border:1px solid var(--rule); border-radius:11px; padding:22px 22px 18px; box-shadow:var(--shadow); margin-bottom:22px}
+.card > h3{margin-bottom:4px}
+.card .sub{margin-bottom:16px}
+
+.scroll{overflow-x:auto; -webkit-overflow-scrolling:touch}
+figure{margin:0}
+figure img{display:block; width:100%; min-width:760px; height:auto}
+figcaption{color:var(--ink-3); font-size:.855rem; margin-top:12px; max-width:78ch}
+
+table{border-collapse:collapse; width:100%; font-size:.878rem; min-width:640px}
+th,td{text-align:right; padding:7px 11px; border-bottom:1px solid var(--rule-2); white-space:nowrap}
+th:first-child,td:first-child{text-align:left; white-space:normal}
+thead th{
+  font-family:"IBM Plex Mono",monospace; font-size:.678rem; letter-spacing:.075em;
+  text-transform:uppercase; color:var(--ink-3); font-weight:500;
+  border-bottom:1px solid var(--rule); position:sticky; top:0; background:var(--panel)
+}
+tbody tr:last-child td{border-bottom:none}
+td.num{font-variant-numeric:tabular-nums; font-family:"IBM Plex Mono",monospace; font-size:.83rem}
+tr.hi td{background:var(--panel-2)}
+.swatch{display:inline-block; width:9px; height:9px; border-radius:2px; margin-right:8px; vertical-align:baseline; flex:none}
+
+.legend{display:flex; flex-wrap:wrap; gap:6px 20px; margin:0 0 14px; font-size:.845rem}
+.legend span{display:inline-flex; align-items:center; color:var(--ink-2)}
+
+.bars{display:flex; flex-direction:column; gap:5px}
+.bar-row{display:grid; grid-template-columns:minmax(150px,1fr) minmax(120px,2.4fr) 58px; align-items:center; gap:12px; font-size:.858rem}
+.bar-row .lbl{color:var(--ink-2); line-height:1.34}
+.bar-row .lbl b{color:var(--ink); font-weight:600}
+.track{background:var(--rule-2); border-radius:0 4px 4px 0; height:15px; position:relative; overflow:visible}
+.fill{height:100%; border-radius:0 4px 4px 0; position:relative; z-index:1}
+.ref-rule{position:absolute; top:-3px; bottom:-3px; width:1px; background:var(--ink-3); z-index:2}
+.bar-row .val{font-family:"IBM Plex Mono",monospace; font-variant-numeric:tabular-nums; font-size:.83rem; color:var(--ink); text-align:right; line-height:1.28}
+.bar-row .val-2{color:var(--ink-3); font-size:.76rem}
+
+.chart{position:relative}
+.chart svg{display:block; width:100%; height:auto; overflow:visible}
+.tip{
+  position:absolute; pointer-events:none; opacity:0; transition:opacity .09s;
+  background:var(--panel); border:1px solid var(--rule); border-radius:7px;
+  box-shadow:var(--shadow); padding:9px 11px; font-size:.8rem; min-width:158px; z-index:5
+}
+.tip .ty{font-family:"IBM Plex Mono",monospace; font-size:.7rem; letter-spacing:.07em; color:var(--ink-3); margin-bottom:6px}
+.tip .tr{display:flex; align-items:center; justify-content:space-between; gap:14px; line-height:1.62}
+.tip .tr .tn{display:flex; align-items:center; color:var(--ink-2)}
+.tip .tr .tv{font-family:"IBM Plex Mono",monospace; font-variant-numeric:tabular-nums; color:var(--ink)}
+
+.callout{border-left:2px solid var(--accent); padding:2px 0 2px 18px; margin:26px 0; color:var(--ink-2)}
+.callout strong{color:var(--ink)}
+.warn{border-left-color:var(--pos)}
+
+details{border:1px solid var(--rule); border-radius:9px; background:var(--panel); padding:0; margin-top:18px}
+summary{cursor:pointer; padding:13px 18px; font-size:.9rem; color:var(--ink-2); font-weight:500; list-style:none}
+summary::-webkit-details-marker{display:none}
+summary::before{content:"▸ "; color:var(--ink-3)}
+details[open] summary::before{content:"▾ "}
+details[open] summary{border-bottom:1px solid var(--rule)}
+details .body{padding:14px 18px 18px}
+
+footer{border-top:1px solid var(--rule); padding-top:26px; color:var(--ink-3); font-size:.85rem}
+:focus-visible{outline:2px solid var(--accent); outline-offset:2px; border-radius:3px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important; animation:none!important}}
+@media (max-width:640px){
+  .bar-row{grid-template-columns:1fr 44px; }
+  .bar-row .track{grid-column:1/-1}
+}
+</style>
+
+<div class="wrap">
+
+<header>
+  <p class="eyebrow">Atmospheric Δ¹⁴C forcing · candidate comparison</p>
+  <h1>Six ways to say what the atmosphere&nbsp;contains</h1>
+  <p class="lede">
+    Prescribed atmospheric Δ¹⁴C drives both disequilibrium fluxes and the transported
+    tracer's cross-term. This project currently uses <em>three different ones at once</em>.
+    Here is what each candidate looks like, what it does to the ocean isoflux, and what
+    the station network says about which is right.
+  </p>
+</header>
+
+<section>
+  <div class="stats">
+    <div class="stat">
+      <div class="k">Predictive skill</div>
+      <div class="v num">2.918 ‰</div>
+      <div class="n">Leave-one-station-out RMSE, tied between the kriged field and a plain step at the Equator. The network supports an interhemispheric contrast and nothing more.</div>
+    </div>
+    <div class="stat">
+      <div class="k">What ocedis uses today</div>
+      <div class="v num" style="color:var(--pos)">3.847 ‰</div>
+      <div class="n">Miller's NH/SH +10‰ tropical band — the <em>worst</em> candidate on this network, and worse than adding no tropical structure at all.</div>
+    </div>
+    <div class="stat">
+      <div class="k">Hua's level offset</div>
+      <div class="v num">+7 ‰</div>
+      <div class="n">Hua et al. (2021) sits ~6–8‰ above Graven and Miller. De-levelled, its <em>shape</em> scores 2.971 — within 0.05‰ of our own field.</div>
+    </div>
+    <div class="stat">
+      <div class="k">Isoflux spread, 2012</div>
+      <div class="v num">27 %</div>
+      <div class="n">Largest single shift — <code>hua_pub</code>'s 432 PgC‰/yr against the incumbent's own three-year mean of 1569. Level dominates shape by about 35×.</div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>The three-way inconsistency</h2>
+  <p class="sub">Δ¹⁴C of the atmosphere is one physical quantity. It currently enters the system with three different values.</p>
+  <div class="card scroll">
+    <table>
+      <thead><tr><th>Consumer</th><th style="text-align:left">What it receives</th><th style="text-align:left">Spatial structure</th></tr></thead>
+      <tbody>
+        <tr><td>TM5 cross-term <code>emission_fwd.F90:360</code></td><td style="text-align:left">one global scalar per month</td><td style="text-align:left">none — <code>atmos_del</code> has no <code>(i,j)</code> index</td></tr>
+        <tr><td>Ocean disequilibrium <code>ocedis</code></td><td style="text-align:left">NH/SH step, +10‰ over 10°N–40°S</td><td style="text-align:left">four latitude bands</td></tr>
+        <tr><td>Terrestrial disequilibrium <code>biodis</code></td><td style="text-align:left">unknown</td><td style="text-align:left">the LPJ product is external to this tree</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="callout">
+    <strong>This gap is larger than most of the choices debated below.</strong> A Δ_atm shift of
+    the size at stake here is worth 6–8% of the terrestrial isoflux, and the transported tracer
+    is currently being told something different again.
+  </div>
+</section>
+
+<section>
+  <h2>What the six candidates look like</h2>
+  <p class="sub">2012 annual mean. Only <code>krige</code> varies with longitude; everything else is a set of latitude bands, so the edges you see are band boundaries rather than physics.</p>
+  <div class="card">
+    <figure>
+      <div class="scroll"><img src="__MAP_DATM__" alt="Six global maps of annual-mean atmospheric Delta-14C for 2012. The kriged field varies smoothly with latitude and slightly with longitude; the others show discrete latitude bands. Hua as published is uniformly higher than the rest."></div>
+      <figcaption>
+        <code>hua_geom</code> and <code>hua_shape</code> look identical because they share a global
+        mean by construction — they differ only in the <em>size</em> of the equatorial step
+        (6.3‰ against Hua's 5.1‰ in 2012), which a shared colour scale cannot show. The per-panel
+        numbers carry that difference.
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<section>
+  <h2>Where the choice actually bites</h2>
+  <p class="sub">Per-cell change in the 2012 ocean disequilibrium isoflux, each candidate against the kriged incumbent.</p>
+  <div class="card">
+    <figure>
+      <div class="scroll"><img src="__MAP_ISO__" alt="Five global difference maps of ocean isoflux relative to the kriged field. Miller and Basu bands show a strong concentrated blue band across the tropics and southern subtropics; Hua as published is uniformly blue across the whole ocean."></div>
+      <figcaption>
+        The two band geometries concentrate their entire effect in the tropics and southern
+        subtropics — a strip of ocean where our station coverage is thinnest. <code>hua_pub</code>,
+        by contrast, moves every cell, because its disagreement is a global level offset.
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<section>
+  <h2>Time series</h2>
+  <p class="sub">2000–2023. Hover for values at a year.</p>
+
+  <div class="card">
+    <h3>Global-mean Δ¹⁴C</h3>
+    <p class="sub">The kriged field tracks Graven's independent CMIP6 compilation to within about 1‰ across the whole period. Hua sits consistently above everything.</p>
+    <div id="c-datm" class="chart"></div>
+    <p class="sub" style="margin:14px 0 0">
+      <code>hua_shape</code> is identical to <code>hua_geom</code> here <em>by construction</em> —
+      it is Hua's contrast re-levelled onto our own global mean, so only one line is drawn.
+      The two separate in the isoflux chart below.
+    </p>
+    <p class="sub" style="margin:8px 0 0">
+      Past 2019 <code>hua_pub</code> is the paper's own exponential, not data — and it decays
+      faster than the stations do, crossing from ~7‰ <em>above</em> the others to below them by
+      2023. Our network runs to 2025, so for the later years Hua is extrapolated where we are
+      observed.
+    </p>
+  </div>
+
+  <div class="card">
+    <h3>Interhemispheric contrast, NH − SH</h3>
+    <p class="sub">Compilations, not the variants above. Our stations and Hua agree that the northern deficit is real and growing; Graven's is roughly half the size. After 2019 Hua's NH and SH arms extrapolate on <em>different</em> decay constants, so the contrast between them widens mechanically rather than observationally — the divergence right of the marker is an artefact, not a measurement.</p>
+    <div id="c-grad" class="chart"></div>
+  </div>
+
+  <div class="card">
+    <h3>Global ocean disequilibrium isoflux</h3>
+    <p class="sub">The ocean's ¹⁴C isoflux is heading through zero — and <em>which year it crosses depends on the Δ_atm choice</em>.</p>
+    <div id="c-iso" class="chart"></div>
+  </div>
+
+  <div class="callout warn">
+    <strong>By 2023 the candidates disagree about the sign.</strong> With the kriged field the
+    global ocean isoflux is already <span class="mono">+207</span> PgC‰/yr — the ocean has become
+    a net ¹⁴C <em>source</em>. With the band field currently in use it is still
+    <span class="mono">−91</span>. That is not a rounding difference; it is a qualitative claim
+    about the contemporary carbon cycle resting on a forcing choice nobody had tested.
+  </div>
+</section>
+
+<section>
+  <h2>What the station network says</h2>
+  <p class="sub">
+    Leave-one-station-out RMSE, 1990–2023, background sites only. Each candidate's band values are
+    fitted to the retained stations, so the row measures the <em>geometry</em>. Lower is better.
+  </p>
+  <div class="card">
+    <div class="bar-row" style="margin-bottom:8px">
+      <span class="lbl"></span><span></span>
+      <span class="val" style="font-size:.66rem;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);line-height:1.35">RMSE<br>shape</span>
+    </div>
+    <div class="bars" id="loo-bars"></div>
+    <p class="sub" style="margin:18px 0 0">
+      The de-levelled column removes each month's own mean residual, isolating spatial <em>shape</em>
+      from absolute <em>level</em>. For fitted rows it changes almost nothing; for a published
+      compilation it is the whole story.
+    </p>
+  </div>
+
+  <div class="card">
+    <h3>External compilations</h3>
+    <p class="sub">The published curve itself, fitted to none of our data — strictly harder, and not comparable to the rows above.</p>
+    <div class="bar-row" style="margin-bottom:8px">
+      <span class="lbl"></span><span></span>
+      <span class="val" style="font-size:.66rem;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);line-height:1.35">RMSE<br>shape</span>
+    </div>
+    <div class="bars" id="loo-ext"></div>
+    <p class="sub" style="margin:18px 0 0">
+      Hua's raw error is <span class="mono">7.120</span>; de-levelled it is <span class="mono">2.971</span>,
+      within 0.05‰ of our own kriged field. Its error is <em>almost entirely level, not shape</em>.
+      Caveat: Hua's modern NH curve is built partly from stations scored here (JFJ, NWR, BRW, BHD, CGO),
+      so these rows are not fully independent of the target.
+    </p>
+  </div>
+</section>
+
+<section>
+  <h2>Reading it</h2>
+  <div class="prose">
+    <p>
+      Three findings survive the comparison. First, <strong>a two-parameter step at the Equator is
+      as good as the full kriged field</strong> — 2.918 against 2.918. Hua's geometry is vindicated,
+      and it independently confirms the −6‰ interhemispheric contrast our own stations measure.
+    </p>
+    <p>
+      Second, <strong>Hua's disagreement is level, not shape.</strong> That is what makes it usable:
+      the contrast can be taken from Hua and the absolute value from somewhere better constrained.
+      In practice this barely matters — once the level is fixed, our gradient and Hua's differ by
+      about 1% of the isoflux.
+    </p>
+    <p>
+      Third, <strong>the +10‰ tropical band is rejected by this network.</strong> It scores worse
+      than adding no tropical structure at all, and fitting the hemispheric values from
+      extratropical stations only — which is how Miller's construction actually works — does not
+      rescue it (3.867).
+    </p>
+    <div class="callout">
+      <strong>The one open judgement call.</strong> That band rests on UC&nbsp;Irvine Pacific
+      shipboard transects which are <em>not</em> in this network, and our coverage between 10°N and
+      40°S is three sites. Our stations positively disagree with it, which is evidence — not proof.
+      Dropping it is a decision, not a derivation.
+    </div>
+    <p>
+      On the numbers here the recommendation is to keep the kriged field, point <code>ocedis</code>
+      at it instead of the band field, and treat Hua as the independent corroboration it turns out
+      to be. The larger prize is still unclaimed: giving <code>atmos_del</code> a latitude index so
+      the ~6‰ gradient reaches the transported tracer at all.
+    </p>
+  </div>
+</section>
+
+<section>
+  <h2>The numbers</h2>
+  <p class="sub">Every series on this page, as a table.</p>
+  <details open>
+    <summary>Annual values, 2000–2023</summary>
+    <div class="body scroll"><table id="tbl"></table></div>
+  </details>
+</section>
+
+<footer>
+  <p>
+    Generated from <code>Ocedis/results/delta_atm_comparison.json</code> by
+    <code>scripts/export_delta_atm_comparison.py</code>,
+    <code>scripts/plot_delta_atm_maps.py</code> and
+    <code>scripts/make_delta_atm_page.py</code>. Method and full derivations in
+    <code>Ocedis/docs/SCIENCE.md §12</code>.
+  </p>
+  <p>
+    Sources — Hua et&nbsp;al. (2022) <em>Radiocarbon</em> 64(4) 723–745; Miller, Lehman &amp;
+    Lindsay (2025) <em>GBC</em> 39; Basu, Miller &amp; Lehman (2016) <em>ACP</em> 16; Graven
+    et&nbsp;al. (2017) CMIP6 <em>input4MIPs</em>; Key et&nbsp;al. (2004) GLODAP.
+  </p>
+</footer>
+
+</div>
+
+<script>
+const D = __DATA__;
+
+const fmt = (v, d) => v === null || v === undefined || Number.isNaN(v) ? "–" : v.toFixed(d);
+const cssv = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+
+function niceTicks(lo, hi, n){
+  const span = hi - lo || 1;
+  const raw = span / n;
+  const mag = Math.pow(10, Math.floor(Math.log10(raw)));
+  const step = [1,2,2.5,5,10].map(m => m*mag).find(s => s >= raw) || 10*mag;
+  const out = [];
+  for (let v = Math.ceil(lo/step)*step; v <= hi + 1e-9; v += step) out.push(+v.toFixed(10));
+  return out;
+}
+
+function lineChart(el, spec){
+  const W = 880, H = spec.height || 300;
+  const M = {t: 14, r: spec.padRight || 108, b: 34, l: 56};
+  const iw = W - M.l - M.r, ih = H - M.t - M.b;
+
+  const xs = spec.x;
+  const all = spec.series.flatMap(s => s.values.filter(v => v !== null && !Number.isNaN(v)));
+  let lo = Math.min(...all), hi = Math.max(...all);
+  if (spec.includeZero){ lo = Math.min(lo, 0); hi = Math.max(hi, 0); }
+  const pad = (hi - lo) * 0.08 || 1;
+  lo -= pad; hi += pad;
+
+  const X = i => M.l + (iw * i) / Math.max(1, xs.length - 1);
+  const Y = v => M.t + ih - (ih * (v - lo)) / (hi - lo);
+
+  const yt = niceTicks(lo, hi, 5);
+  const mk = spec.marker;
+  const xEvery = Math.ceil(xs.length / 8);
+
+  let g = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${spec.aria}">`;
+  g += `<g stroke="${cssv('--rule-2')}" stroke-width="1">`;
+  yt.forEach(v => { g += `<line x1="${M.l}" x2="${M.l+iw}" y1="${Y(v).toFixed(1)}" y2="${Y(v).toFixed(1)}"/>`; });
+  g += `</g>`;
+  if (lo < 0 && hi > 0)
+    g += `<line x1="${M.l}" x2="${M.l+iw}" y1="${Y(0).toFixed(1)}" y2="${Y(0).toFixed(1)}" stroke="${cssv('--ink-3')}" stroke-width="1"/>`;
+
+  g += `<g fill="${cssv('--ink-3')}" font-size="11" font-family="IBM Plex Mono, monospace">`;
+  yt.forEach(v => { g += `<text x="${M.l-9}" y="${Y(v)+3.6}" text-anchor="end">${fmt(v, spec.yDec ?? 0)}</text>`; });
+  xs.forEach((x, i) => { if (i % xEvery === 0 || i === xs.length-1)
+    g += `<text x="${X(i)}" y="${M.t+ih+21}" text-anchor="middle">${x}</text>`; });
+  g += `</g>`;
+  g += `<text x="${M.l-9}" y="${M.t-3}" text-anchor="end" fill="${cssv('--ink-3')}" font-size="10.5" font-family="IBM Plex Mono, monospace">${spec.yUnit}</text>`;
+
+  // Where a series stops being data and starts being extrapolation. Hua's
+  // tables end at 2019.375; past that its NH and SH arms run on exponentials
+  // with DIFFERENT decay constants, so the curves -- and the gradient between
+  // them -- diverge mechanically rather than observationally.
+  if (mk){
+    const mx = X(xs.indexOf(mk.at));
+    g += `<line x1="${mx}" x2="${mx}" y1="${M.t}" y2="${M.t+ih}" stroke="${cssv('--ink-3')}" stroke-width="1" stroke-dasharray="2 4"/>`;
+    g += `<text x="${mx+5}" y="${M.t+10}" fill="${cssv('--ink-3')}" font-size="10" font-family="IBM Plex Mono, monospace">${mk.label}</text>`;
+  }
+
+  const ends = [];
+  spec.series.forEach(s => {
+    let d = "", open = false;
+    s.values.forEach((v, i) => {
+      if (v === null || Number.isNaN(v)) { open = false; return; }
+      d += (open ? "L" : "M") + X(i).toFixed(1) + " " + Y(v).toFixed(1) + " ";
+      open = true;
+    });
+    g += `<path d="${d}" fill="none" stroke="${s.color}" stroke-width="${s.ref?1.6:2}"`
+      + (s.ref ? ` stroke-dasharray="5 4"` : ``)
+      + ` stroke-linejoin="round" stroke-linecap="round"/>`;
+    const li = s.values.map((v,i)=>[v,i]).filter(([v])=>v!==null&&!Number.isNaN(v)).pop();
+    if (li) ends.push({name: s.name, color: s.color, x: X(li[1]), y: Y(li[0])});
+  });
+
+  // Direct end-labels only work if they do not sit on top of each other. In
+  // the isoflux chart four series land within a few permil of zero in 2023,
+  // so push them apart and draw a leader to the true endpoint.
+  ends.sort((a, b) => a.y - b.y);
+  const GAP = 14;
+  for (let i = 1; i < ends.length; i++)
+    if (ends[i].y - ends[i-1].y < GAP) ends[i].y = ends[i-1].y + GAP;
+  const drop = (ends.at(-1)?.y ?? 0) - (M.t + ih);
+  if (drop > 0) ends.forEach(e => e.y -= drop);
+  ends.forEach(e => {
+    g += `<text x="${e.x + 11}" y="${e.y + 3.6}" fill="${e.color}" font-size="11.5" font-weight="500">${e.name}</text>`;
+  });
+
+  // Class, not id: three charts share this document.
+  g += `<g class="cross" opacity="0"><line y1="${M.t}" y2="${M.t+ih}" stroke="${cssv('--ink-3')}" stroke-width="1" stroke-dasharray="3 3"/></g>`;
+  g += `</svg>`;
+
+  const leg = `<div class="legend">` + spec.series.map(s =>
+      `<span><i class="swatch" style="background:${s.color}"></i>${s.name}</span>`).join("") + `</div>`;
+  el.innerHTML = leg + g + `<div class="tip"></div>`;
+  const svg = el.querySelector("svg"), tip = el.querySelector(".tip"), cross = svg.querySelector(".cross");
+
+  function move(ev){
+    const r = svg.getBoundingClientRect();
+    const px = ((ev.clientX ?? ev.touches?.[0]?.clientX) - r.left) / r.width * W;
+    let i = Math.round(((px - M.l) / iw) * (xs.length - 1));
+    i = Math.max(0, Math.min(xs.length - 1, i));
+    cross.setAttribute("opacity", "1");
+    cross.querySelector("line").setAttribute("x1", X(i)); cross.querySelector("line").setAttribute("x2", X(i));
+    tip.innerHTML = `<div class="ty">${xs[i]}</div>` + spec.series.map(s =>
+      `<div class="tr"><span class="tn"><i class="swatch" style="background:${s.color}"></i>${s.name}</span>`
+      + `<span class="tv">${fmt(s.values[i], spec.tipDec ?? 1)}</span></div>`).join("");
+    tip.style.opacity = 1;
+    const left = (X(i) / W) * r.width;
+    tip.style.left = Math.min(Math.max(left + 14, 0), r.width - tip.offsetWidth - 4) + "px";
+    tip.style.top = "8px";
+  }
+  svg.addEventListener("pointermove", move);
+  svg.addEventListener("pointerleave", () => { tip.style.opacity = 0; cross.setAttribute("opacity","0"); });
+}
+
+const dark = () => document.documentElement.dataset.theme === "dark"
+  || (!document.documentElement.dataset.theme && matchMedia("(prefers-color-scheme: dark)").matches);
+const col = s => dark() ? s.dark : s.light;
+const byKey = Object.fromEntries(D.series.map(s => [s.key, s]));
+
+function render(){
+  const yrs = D.years;
+  const gm = new Map(D.graven_global);
+
+  lineChart(document.getElementById("c-datm"), {
+    x: yrs, yUnit: "‰", yDec: 0, tipDec: 2, height: 320,
+    marker: {at: 2019, label: "Hua data end →"},
+    aria: "Global-mean atmospheric Delta-14C, 2000 to 2023, for six candidate fields plus Graven's compilation. All decline from about 90 permil to near zero. Hua as published sits 6 to 8 permil above the rest until 2019, then falls through them.",
+    series: [
+      ...["krige","current","basu_band","hua_geom","hua_pub"].map(k =>
+        ({name: k, color: col(byKey[k]), values: D.datm[k]})),
+      {name: "graven", color: cssv("--ref"), ref: true,
+       values: yrs.map(y => gm.has(y) ? gm.get(y) : null)},
+    ],
+  });
+
+  const gg = new Map(D.gradient.graven);
+  lineChart(document.getElementById("c-grad"), {
+    x: yrs, yUnit: "‰", yDec: 0, tipDec: 2, height: 268, padRight: 128,
+    marker: {at: 2019, label: "Hua data end →"},
+    aria: "Northern minus southern hemisphere Delta-14C, 2000 to 2023. Our stations and Hua both trend to about minus 10 permil; Graven stays near minus 3. Hua's contrast diverges after 2019 where it is extrapolated.",
+    series: [
+      {name: "our stations", color: col(byKey.krige), values: D.gradient.ours},
+      {name: "Hua (2021)", color: col(byKey.hua_pub), values: D.gradient.hua},
+      {name: "Graven (2017)", color: cssv("--ref"), ref: true,
+       values: yrs.map(y => gg.has(y) ? gg.get(y) : null)},
+    ],
+  });
+
+  lineChart(document.getElementById("c-iso"), {
+    x: yrs, yUnit: "PgC‰/yr", yDec: 0, tipDec: 0, height: 320, includeZero: true,
+    aria: "Global ocean disequilibrium isoflux, 2000 to 2023, for six candidate fields. All rise from about minus 4200 toward zero; by 2023 the candidates straddle zero.",
+    series: D.series.map(s => ({name: s.key, color: col(s), values: D.isoflux[s.key]})),
+  });
+}
+
+function bars(el, rows, max, ref){
+  // Colour comes from the row's own tag, not from matching its label text.
+  const TAG = {
+    "incumbent": () => cssv("--accent"),
+    "incumbent-tm5": () => cssv("--pos"),
+    "incumbent-ocedis": () => cssv("--pos"),
+  };
+  el.innerHTML = rows.map(([name, raw, delev, tag]) => {
+    const c = (TAG[tag] || (() => cssv("--ink-3")))();
+    const em = tag && tag.startsWith("incumbent");
+    return `<div class="bar-row">
+      <span class="lbl">${em ? "<b>"+name+"</b>" : name}</span>
+      <span class="track">${ref ? `<span class="ref-rule" style="left:${(ref/max*100).toFixed(1)}%"></span>` : ""}<span class="fill" style="width:${(raw/max*100).toFixed(1)}%;background:${c}"></span></span>
+      <span class="val">${raw.toFixed(3)}<br><span class="val-2">${delev.toFixed(3)}</span></span>
+    </div>`;
+  }).join("");
+}
+
+function table(){
+  const yrs = D.years, gm = new Map(D.graven_global);
+  const keys = D.series.map(s => s.key);
+  let h = `<thead><tr><th>Year</th>`
+    + keys.map(k => `<th>${k}<br><span style="font-weight:400;text-transform:none;letter-spacing:0">Δ¹⁴C ‰</span></th>`).join("")
+    + `<th>graven<br><span style="font-weight:400;text-transform:none;letter-spacing:0">Δ¹⁴C ‰</span></th>`
+    + keys.map(k => `<th>${k}<br><span style="font-weight:400;text-transform:none;letter-spacing:0">isoflux</span></th>`).join("")
+    + `</tr></thead><tbody>`;
+  yrs.forEach((y, i) => {
+    h += `<tr${y === D.map_year ? ' class="hi"' : ""}><td>${y}</td>`
+      + keys.map(k => `<td class="num">${fmt(D.datm[k][i], 2)}</td>`).join("")
+      + `<td class="num">${gm.has(y) ? fmt(gm.get(y), 2) : "–"}</td>`
+      + keys.map(k => `<td class="num">${fmt(D.isoflux[k][i], 0)}</td>`).join("")
+      + `</tr>`;
+  });
+  document.getElementById("tbl").innerHTML = h + "</tbody>";
+}
+
+// Everything that reads a CSS custom property has to be rebuilt when the
+// theme changes -- the bars take their colour from --accent/--pos the same
+// way the charts do, so redrawing only the charts would leave them stranded
+// in the previous theme.
+function renderAll(){
+  render();
+  bars(document.getElementById("loo-bars"), D.loo, 4.6, 2.918);
+  bars(document.getElementById("loo-ext"), D.loo_external, 8.0);
+}
+
+renderAll();
+table();
+
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", renderAll);
+new MutationObserver(renderAll).observe(document.documentElement,
+  {attributes:true, attributeFilter:["data-theme"]});
+addEventListener("resize", () => { clearTimeout(window._rt); window._rt = setTimeout(render, 120); });
+</script>

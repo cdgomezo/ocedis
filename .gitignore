@@ -1,0 +1,37 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+*.egg-info/
+.DS_Store
+.venv/
+.superpowers/
+
+# large/raw data, user-supplied, not checked in
+data/raw/
+data/processed/
+*.nc
+
+# reference PDFs (large, copyrighted third-party literature)
+*.pdf
+
+# ERA5 API credentials
+.cdsapirc
+
+# Model output and analysis results: regenerable from the scripts, and large
+output/
+results/
+
+# Reference literature and third-party datasets kept locally, not redistributed
+pdfs/
+Pookkandy2023_data/
+
+# Agent and editor local state
+.claude/
+
+# Project-internal notes, superseded by README.md and docs/
+CLAUDE.md
+HANDOFF.md
+
+# Site-specific build glue: absolute HPC paths and an external preprocessor.
+# Kept locally because it is the production build, but it is not portable.
+scripts/build_eurocom_2024.sh

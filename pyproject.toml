@@ -1,0 +1,29 @@
+[project]
+name = "ocean14c"
+version = "0.1.0"
+description = "Ocean 14C isotopic disequilibrium isoflux reconstruction (Miller, Lehman & Lindsay 2025)"
+requires-python = ">=3.10"
+dependencies = [
+    "numpy",
+    "scipy",
+    "xarray",
+    "pandas",
+    "matplotlib",
+    "netCDF4",
+    "pyyaml",
+]
+
+[project.optional-dependencies]
+dev = ["pytest"]
+era5 = ["cdsapi"]
+viz = ["cartopy"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]

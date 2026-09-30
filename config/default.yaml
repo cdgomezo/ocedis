@@ -1,0 +1,113 @@
+# Ocean 14C isotopic disequilibrium isoflux -- v1 configuration.
+#
+# WARNING: THIS FILE IS DOCUMENTATION. Nothing reads it -- there is no loader in
+# scripts/ or src/. The values below record the intended defaults and the
+# reasoning behind them, but the switches that actually act are command-line
+# arguments to scripts/validate_full_series.py (--regression-version,
+# --atm-geometry, --atm-level, --curve-fit, --gamma) and keyword arguments to
+# ocean14c.pipeline.reconstruct_year. Editing a key here changes nothing.
+#
+# The three toggles below correspond to genuine ambiguities in the
+# literature (see CLAUDE.md and the plan's "Gas-transfer calibration"
+# section), not implementation bugs. Defaults reproduce Table 1 / Table S2
+# of Miller, Lehman & Lindsay (2025) as closely as v1's inputs allow.
+
+regression:
+  # "original" (Fig. S2) matches Table 1/S2 exactly; "v2" (Fig. S5, GLODAP v2
+  # update) is the paper's own documented sensitivity check (-62% -> -59.5%
+  # change in global isoflux 2000-2012).
+  #
+  # "glodap2020_npac" keeps original's cold/warm coefficients but adds a third
+  # population for the northern North Pacific, fitted from GLODAPv2.2020
+  # bottle data (scripts/refit_regression_glodap.py). The published cold line
+  # over-predicts the decline there by ~2x -- bias -23.2 permil/decade over 24
+  # boxes, independently corroborated by Pookkandy et al. (2023)'s NEMO run --
+  # while the published warm coefficients validate cleanly (bias +2.6 over 100
+  # boxes). NOT the default: "original" is what reproduces Table 1/S2, which
+  # remains this project's primary validation target. See docs/SCIENCE.md 8.2.
+  coefficients_version: original
+
+atmosphere:
+  # Tropical correction band added to Delta_atm between two latitudes, to
+  # represent the observed Pacific meridional gradient.
+  #   miller: 10N to 40S, +10 permil -- Miller et al. (2025) main text default,
+  #     visible as the sharp boundary lines in their Fig. 1b.
+  #   basu:   20N to 20S, +10 permil -- Basu et al. (2016) alternate, for
+  #     cross-checking acp-16-5665-2016.pdf.
+  tropical_band: miller
+
+  # Which representation of Delta_atm(lat) the ocean isoflux uses.
+  #
+  #   miller_band  NH/SH + 10 permil over 10N..40S. The DEFAULT and what every
+  #                shipped number was built with. Also, per the leave-one-out
+  #                ladder in scripts/validate_delta_atm_grid.py, the WORST of
+  #                the candidates on this network: 3.85 permil against 2.92 for
+  #                a plain hemispheric step, and no better when the hemispheric
+  #                values are fitted from extratropical stations only (3.87),
+  #                so it is not an artefact of double-counting. The +10 permil
+  #                band comes from UC Irvine Pacific shipboard transects that
+  #                are not in our network -- see docs/SCIENCE.md before
+  #                concluding it is simply wrong.
+  #   basu_band    the same over 20N..20S (Basu et al. 2016). Scores 4.37.
+  #   hemispheric  plain NH/SH step at the Equator, i.e. what Hua et al. (2021)
+  #                reduces to for 1973 onward. Scores 2.918 -- tied with the
+  #                kriged field.
+  #   hua          Hua's published curves rather than our stations. See
+  #                atmosphere_level below; as published they sit ~6-8 permil
+  #                high.
+  #   krige        the shipped 1x1 kriged field, output/d14c_atm.<year>.nc.
+  #                Best measured skill, built from all 22 stations rather than
+  #                the six the hemispheric splice uses, and carries a per-cell
+  #                uncertainty. NOT what the pipeline uses today.
+  #
+  # Changing this moves the global ocean isoflux by up to ~20% (2011-2013:
+  # miller_band -1569, krige -1337, hemispheric -1250 PgC permil/yr mean), so
+  # it is not a cosmetic switch. scripts/compare_delta_atm_variants.py
+  # measures it.
+  # ACTS AS: scripts/validate_full_series.py --atm-geometry
+  geometry: miller_band
+
+  # Only meaningful for geometry: hua.
+  #   native    Hua's own absolute values.
+  #   stations  Hua's shape re-levelled onto our own global mean. Hua matches
+  #             this network on the interhemispheric gradient but sits ~6-8
+  #             permil above Graven et al. (2017) and Miller et al. (2025) in
+  #             absolute terms, and Delta_atm enters as Delta_source -
+  #             Delta_atm, so level and shape must be chosen separately.
+  # ACTS AS: scripts/validate_full_series.py --atm-level
+  level: native
+
+  # Half-width, in degrees, of a linear blend across each band boundary. 0
+  # reproduces the hard steps every one of these geometries has in the
+  # literature -- the straight lines at 10N and 40S in Miller et al.'s Fig. 1b
+  # are exactly that artefact. Measured effect on the isoflux is <0.1%, so this
+  # is about not handing a transport model a discontinuity, not about skill.
+  # NOT exposed on the CLI; pass blend_deg through reconstruct_year's
+  # atm_variant dict if it is ever wanted.
+  blend_deg: 0.0
+
+gas_exchange:
+  # Schmidt-number polynomial: "1992" (Wanninkhof 1992 Table A1, the paper's
+  # own cited method) or "2014" (Wanninkhof 2014 Table 1, updated quartic
+  # fit valid over a wider temperature range).
+  schmidt_polynomial: "1992"
+  # gamma, the k = gamma * <U^2> * (Sc/660)^-0.5 calibration constant.
+  # Miller et al. (2025) state they rescaled Wanninkhof (1992)'s coefficient
+  # to the whole-ocean bomb-14C inventory "using the scaling factor
+  # appropriate for ERA-Interim winds" -- that exact numeric factor is not
+  # published anywhere we have access to. v1 defaults to Wanninkhof (1992)
+  # Eq. 3's own coefficient (0.31), which is structurally correct for <U^2>
+  # (the true second moment ocean14c.atmosphere_forcing computes), rather
+  # than 2014's
+  # 0.251 (calibrated for a different wind product's moments) or 1992's 0.39
+  # (calibrated for the wrong moment, (mean U)^2). validate.fit_gamma can
+  # refit this against Table S2's Global_Foa series once real ERA5 wind data
+  # is available (data/processed/era5_u2/, written by
+  # ocean14c.atmosphere_forcing) as a pragmatic stand-in for the unpublished
+  # ERA-Interim-specific recalibration.
+  gamma: 0.31
+
+southern_ocean:
+  # Northern border = the 20 permil isoline in the 1995 GLODAP field
+  # (dynamic, not a fixed latitude).
+  isoline_threshold: 20.0

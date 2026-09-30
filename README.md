@@ -251,5 +251,36 @@ University. carlos.gomez@mgeo.lu.se
 
 ## License
 
-Not yet chosen. The input data under `data/raw/` is third-party, is not
-redistributed here, and carries its own licence per source; see `docs/DATA.md`.
+The code in this repository is MIT licensed, see `LICENSE`.
+
+That covers the implementation. It does not cover several things this work rests
+on, and the distinction matters here more than in most repositories, because
+this package reconstructs someone else's published method from other people's
+data:
+
+- **The method.** The empirical two-population regression, the Southern Ocean
+  isoline definition, the tropical correction band and the overall recipe are
+  from Miller, Lehman & Lindsay (2025) and the dissertation behind it. The
+  gas transfer velocity, the Schmidt number polynomial and the solubility are
+  from Wanninkhof and Weiss. If you use the results, cite those papers; this
+  repository is an independent implementation of their work, not a new method.
+- **Coefficients inside the code.** `regression.py` carries the regression
+  coefficients from the reference paper's supporting information,
+  `gas_exchange.py` the Schmidt polynomial coefficients, and `validate.py` the
+  published Table 1 and Table S2 values used as test fixtures. Those numbers
+  belong to their authors and are quoted so the reconstruction can be checked
+  against them.
+- **Vendored third-party code.** `src/ocean14c/vendor/` is the NOAA Global
+  Monitoring Laboratory `ccgcrv` curve-fitting implementation (Thoning, Tans &
+  Komhyr 1989), about 1450 lines, included in-tree so a run is reproducible.
+  It is NOAA's code under NOAA's terms, not MIT, and is unmodified; see the
+  header of `ccg_filter.py` and https://gml.noaa.gov/ccgg/mbl/crvfit/crvfit.html.
+- **Input data.** None of it is redistributed here. The surface ocean
+  climatology, the pCO2 climatology, the atmospheric station records, the
+  reanalysis winds and the published compilations each come from their own
+  provider under their own terms, several of which ask to be cited or
+  acknowledged. `docs/DATA.md` names every source and where to get it.
+
+So: the code is yours to use under MIT. The numbers it produces are only as
+reusable as the data and methods underneath them allow, and those have to be
+credited separately.

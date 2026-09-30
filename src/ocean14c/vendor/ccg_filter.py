@@ -9,6 +9,8 @@
 #
 # Kept in-tree so runs are reproducible and the package is self-contained.
 # Only dependencies are numpy/scipy.
+# NOAA's code under NOAA's terms, NOT the MIT licence this repository carries
+# for its own code.
 # Local changes: none.
 # ---------------------------------------------------------------------------
 # vim: tabstop=4 shiftwidth=4 expandtab

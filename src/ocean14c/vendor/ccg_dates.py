@@ -1,3 +1,18 @@
+# ---------------------------------------------------------------------------
+# VENDORED THIRD-PARTY CODE -- DO NOT EDIT
+#
+# NOAA Global Monitoring Laboratory ccgcrv date utilities, distributed with the
+# curve-fitting filter in ccg_filter.py (Thoning, Tans & Komhyr 1989, JGR 94,
+# 8549-8565).
+#
+# Upstream:      https://gml.noaa.gov/ccgg/mbl/crvfit/crvfit.html
+# Vendored on:   2026-08-04
+#
+# Kept in-tree so runs are reproducible and the package is self-contained.
+# NOAA's code under NOAA's terms, NOT the MIT licence this repository carries
+# for its own code.
+# Local changes: none.
+# ---------------------------------------------------------------------------
 # vim: tabstop=4 shiftwidth=4 expandtab
 """ Some utility functions for converting dates to different formats """
 
